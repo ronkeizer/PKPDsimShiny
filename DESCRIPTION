@@ -1,0 +1,19 @@
+Package: PKPDsimShiny
+Type: Package
+Title: Shiny app for PKPD simulations
+Version: 0.2
+Date: 2015-12-07
+Author: Ron Keizer
+Maintainer: Ron Keizer <ronkeizer@gmail.com>
+LinkingTo: Rcpp, BH
+Depends:
+    R (>= 3.0.2),
+Imports:
+    shiny,
+    dplyr,
+    ggplot2,
+    PKPDsim
+Description:Create a Shiny app based on PKPDsim simulations
+License: MIT
+LazyData: TRUE
+Suggests: testit
