@@ -1,17 +1,18 @@
 library(shiny)
+library(deSolve)
 library(dplyr)
 library(ggplot2)
-library(PKPDsim)
 
 p       <- readRDS("parameters.rds")
 len     <- ceiling(length(names(p))/2)
 regimen <- readRDS("regimen.rds")
 misc    <- readRDS("misc.rds")
 
-if(!is.null(misc$code)) {
-  model <- PKPDsim::new_ode_model (code = misc$code, obs = misc$obs)
+if(!is.null(attr(misc$ode, "code"))) {
+  message("Compiling model...")
+  model <- new_ode_model (code = attr(misc$ode, "code"), obs = attr(misc$ode, "obs"))
 } else {
-  model <- misc$ode
+  error("Model not found!")
 }
 
 if(is.null(misc$tmax)) {
@@ -62,22 +63,24 @@ shinyServer(function(input, output) {
     })
   output$simSetup <- renderUI({
     list(h4("Regimen"),
-    fluidRow(
-      column(12, sliderInput("n_ind", "Number of individuals:", min = 1, max = 100, value = 1))),
-    fluidRow(
-      column(6, textInput("amt", "Amount:", value = regimen$amt)),
-      column(6, textInput("interval", "Interval:", value = regimen$interval))),
-    fluidRow(
-      column(12, sliderInput("n", "Number of doses:", min = 1, max = 20, value = length(regimen$dose_times)),
-             selectInput("type", "Dose type", c("Bolus", "Infusion"), selected="Bolus"),
-             sliderInput("t_inf", "Infusion length:", min = 1, max = 12, value = regimen$t_inf)
-      ))
+         fluidRow(
+           column(12, sliderInput("n_ind", "Number of individuals:", min = 1, max = 100, value = 1))),
+         fluidRow(
+           column(6, textInput("amt", "Amount:", value = regimen$amt)),
+           column(6, textInput("interval", "Interval:", value = regimen$interval))),
+         fluidRow(
+           column(12, sliderInput("n", "Number of doses:", min = 1, max = 20, value = length(regimen$dose_times)),
+                  selectInput("type", "Dose type", c("Bolus", "Infusion"), selected="Bolus"),
+                  sliderInput("t_inf", "Infusion length:", min = 1, max = 12, value = regimen$t_inf)
+           ))
     )
   })
   output$warning_text <- renderPrint({
     warning_text <- ""
-    if (length(grep("CI", input$plot_type))>0 & input$n_ind < 10) {
-      warning_text <- "Warning: Please increase number of individuals to >10 to calculate confidence intervals. For precise estimate this number needs to be much higher (n=500 or more depending on the CI)."
+    if(!is.null(input$plot_type)) {
+      # if (length(grep("CI", input$plot_type))>0 & input$n_ind < 10) {
+      #   warning_text <- "Warning: Please increase number of individuals to >10 to calculate confidence intervals. For precise estimate this number needs to be much higher (n=500 or more depending on the CI)."
+      # }
     }
     cat(warning_text)
   })
@@ -108,7 +111,7 @@ shinyServer(function(input, output) {
     pars_code <- paste0(pars_code, ")\n")
     code <- paste0(code, pars_code)
     code <- paste0(code, '\n',
-                   'regimen <- PKPDsim::new_regimen(
+                   'regimen <- new_regimen(
                    amt = ', as.numeric(input$amt), ',
                    n = ', input$n, ',
                    interval = ', input$interval, ',
@@ -171,10 +174,17 @@ shinyServer(function(input, output) {
     cat(code)
 })
   output$ind_plot <- renderPlot({
-    regimen <- PKPDsim::new_regimen(
+    if(is.null(input$n)) {
+      n <- 5
+      interval <- 24
+    } else {
+      n <- input$n
+      interval <- input$interval
+    }
+    regimen <- new_regimen(
       amt = as.numeric(input$amt),
-      n = input$n,
-      interval = as.numeric(input$interval),
+      n = n,
+      interval = as.numeric(interval),
       type = tolower(input$type),
       t_inf = as.numeric(input$t_inf)
     )
@@ -184,7 +194,7 @@ shinyServer(function(input, output) {
         pars[[names(p)[i]]] <- input[[names(p)[i]]]
       }
     }
-    dat <- PKPDsim::sim_ode (ode = model,
+    dat <- sim_ode (ode = model,
                     parameters = pars,
                     omega = misc$omega,
                     n_ind = input$n_ind,
@@ -237,4 +247,4 @@ shinyServer(function(input, output) {
     return(p)
   })
   outputOptions(output, name = "parInputs")
-  })
+})

@@ -11,23 +11,24 @@ output: html_document
 The code below will create a Shiny app on-the-fly. The model can either be passed using the `code` argument (fast C++ approach), or using the `ode` argument (R::deSolve approach).
 
 ```{r, warning=F, eval=FALSE, message=F, message=F}
-p <- list(CL = 1, V  = 10)
+library(PKPDsim)
+library(PKPDsimShiny)
+library(shiny)
 
-pk_1cmt_iv <- function (t, A, p) {
-  with(p, {
-    KEL <-  CL/V
-    dAdt_1 <- -KEL*A[1] + rate
-    return ( list ( c (  dAdt_1 ) ) )
-  })
-}
+p <- list(CL = 1, V  = 10)
 
 omega <- c(0.3,       # IIV CL
            0.1, 0.3)  # IIV V
 
-sim_ode_shiny(code = "dAdt[1] = -(CL/V)*A[1] ; ",
+pk1cmtiv <- new_ode_model(code = "dAdt[1] = -(CL/V)*A[1] + rate; ")
+r <- new_regimen(amt = 100, n = 5, interval = 12)
+
+sim_ode_shiny(ode = pk1cmtiv,
               par = p,
-              regimen = r3,
+              regimen = r,
               omega = omega)
+
+# runApp("~/shiny-pkpd")
 ```
 
 
