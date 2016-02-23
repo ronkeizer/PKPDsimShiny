@@ -22,7 +22,7 @@
 sim_ode_shiny <- function(name = "",
                           ode = NULL,
                           dde = NULL,
-                          parameters = list(),
+                          parameters = NULL,
                           t_obs = NULL,
                           omega = NULL,
                           omega_type = "exponential",
@@ -33,6 +33,9 @@ sim_ode_shiny <- function(name = "",
                           int_step_size = 0.5,
                           t_max = NULL,
                           shiny_folder = "~/shiny-pkpd") {
+  if(any(c(is.null(ode), is.null(parameters), is.null(regimen)))) {
+    stop("At least an ODE, the model parameters, and a regimen need to be specified to this sim_ode_shiny()")
+  }
   if(!file.exists(shiny_folder)) {
     dir.create(shiny_folder)
   } else {
