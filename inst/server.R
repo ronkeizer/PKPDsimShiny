@@ -222,7 +222,7 @@ shinyServer(function(input, output) {
                     obs_step_size = misc$obs_step_size,
                     int_step_size = misc$int_step_size,
                     regimen = regimen,
-                    #                    A_init = misc$A_init,
+                    A_init = misc$A_init,
                     adherence = list(type = "markov", markov = list(p01 = input$adh_p01, p11 = input$adh_p11)),
                     verbose=FALSE)
     if (input$plot_show != "all") {
