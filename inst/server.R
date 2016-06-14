@@ -13,7 +13,7 @@ if(!is.null(attr(misc$ode, "code"))) {
   message("Compiling model...")
   model <- new_ode_model (code = attr(misc$ode, "code"), obs = attr(misc$ode, "obs"))
 } else {
-  error("Model not found!")
+  stop("Model not found!")
 }
 
 if(is.null(misc$tmax)) {
@@ -242,7 +242,7 @@ shinyServer(function(input, output) {
       if (input$plot_type == "95% CI") {
         ci <- c(0.025, 0.975)
       }
-      dat_tmp <- dat %>% group_by(comp, t) %>% summarise(med = median(y), q_low = quantile(y, ci[1]), q_up = quantile(y, ci[2]))
+      dat_tmp <- dat %>% dplyr::group_by(comp, t) %>% dplyr::summarise(med = median(y), q_low = quantile(y, ci[1], na.rm=TRUE), q_up = quantile(y, ci[2], na.rm=TRUE))
       p <- ggplot(dat_tmp, aes(x=t, y=med)) +
         geom_ribbon(aes(ymin=q_low, ymax=q_up), fill="#bfbfbf", colour=NA) +
         geom_line(aes(y=med))
