@@ -13,8 +13,8 @@ Imports:
     dplyr,
     ggplot2,
     PKPDsim
-Description: Create a Shiny app based on PKPDsim simulations
-License: MIT
+Description: Create a Shiny app based on PKPDsim simulations.
+License: MIT + file LICENSE
 LazyData: TRUE
 Suggests:
     testit
