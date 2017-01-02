@@ -20,7 +20,7 @@ p <- list(CL = 1, V  = 10)
 omega <- c(0.3,       # IIV CL
            0.1, 0.3)  # IIV V
 
-pk1cmtiv <- new_ode_model(code = "dAdt[1] = -(CL/V)*A[1] + rate; ")
+pk1cmtiv <- new_ode_model(code = "dAdt[1] = -(CL/V)*A[1]; ")
 r <- new_regimen(amt = 100, n = 5, interval = 12)
 
 sim_ode_shiny(ode = pk1cmtiv,
@@ -49,4 +49,3 @@ you should update the Shiny library:
 ```
 install.packages("shiny")
 ```
-
